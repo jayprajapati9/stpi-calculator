@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="STPI Calculator">
+    <meta name="description"
+        content="Calculate your STPI. A tool for calculating STPI for diploma to degree based on semester 5 and semester 6 results.">
+
+    <meta name="keywords" content="STPI, GTU, d2d, diploma to degree, gtu stpi, stpi result">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+
+    <!-- Google Font CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Box Icon CDN -->
+    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Tailwind Css -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Css -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    
+    <!-- Title -->
+    <title>STPI Calculator</title>
+</head>
+
+<body>
+    <!--  -->
+    <div id="popup"
+        class="hidden h-full w-full fixed left-0 top-0 bg-gray-900 bg-opacity-60 z-30 flex items-center justify-center">
+        <div class="w-full max-w-[300px] bg-white rounded-lg flex items-center flex-col justify-center drop-shadow-2xl">
+            <div class="w-full flex items-center justify-between border-b rounded-t-lg px-2 py-1.5">
+                <p>Your Result</p>
+                <i id="closePopup" class="bx bx-x text-2xl cursor-pointer"></i>
+            </div>
+            <h1 class="text-3xl mt-3 mb-1" id="_totalSTPI"></h1>
+            <p>Total STPI</p>
+            <div class="w-3/4 border-b my-3"></div>
+            <div class="flex flex-row mb-2">
+                <div class="flex items-center flex-col mr-2">
+                    <p class="text-md">STPI 1</p>
+                    <h1 class="text-xl mt-1" id="_totalSTPI_1"></h1>
+                </div>
+                <div class="flex items-center flex-col ml-2">
+                    <p class="text-md">STPI 2</p>
+                    <h1 class="text-xl mt-1" id="_totalSTPI_2"></h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  -->
+    <div class="_container">
+        <div class="_bgStyle"></div>
+        <nav class="nav">
+            <a href="/" class="_backLink"><i class='bx bx-arrow-back'></i>Back</a>
+            <a href="#faq">How it works ?</a>
+        </nav>
+        <div class="_containerBody">
+            <p class="_streamName">
+                <%- subjectData.sname %>
+            </p>
+            <!-- <p><%- JSON.stringify(subjectData) %></p> -->
+            <div class="_tablContainer">
+                <table class="_table">
+                    <thead>
+                        <tr>
+                            <th>Sem</th>
+                            <th>Code</th>
+                            <th>Subject</th>
+                            <th>Credit</th>
+                            <th>ESE Grades</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0; i < subjectData["subjects"].length; i++) { %>
+                            <tr>
+                                <td data-label="Sem" class="sem">
+                                    <%=subjectData["subjects"][i].sem %>
+                                </td>
+                                <td data-label="Code">
+                                    <%=subjectData["subjects"][i].code %>
+                                </td>
+                                <td data-label="Subject">
+                                    <%=subjectData["subjects"][i].name %>
+                                </td>
+                                <td data-label="Credit" class="credit">
+                                    <%=subjectData["subjects"][i].credit %>
+                                </td>
+                                <td data-label="ESE Grades">
+                                    <div class="_myselect">
+                                        <select name="" id="" class="selectGr">
+                                            <option value="AA">AA</option>
+                                            <option value="AB">AB</option>
+                                            <option value="BB">BB</option>
+                                            <option value="BC">BC</option>
+                                            <option value="CC">CC</option>
+                                            <option value="CD">CD</option>
+                                            <option value="DD">DD</option>
+                                        </select>
+                                        <i class="bx bx-chevron-down"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <button id="calculateBtn">
+                <p class="btnTxt">Calculate STPI</p>
+                <i class='bx bxs-calculator'></i>
+            </button>
+            <br>
+        </div>
+    </div>
+    <script>
+        function getStpi(gcTotal, creditTotal) {
+            return gcTotal / creditTotal;
+        }
+
+
+        const grArr = ["AA", "AB", "BB", "BC", "CC", "CD", "DD"]
+        const grvalArr = [10, 9, 8, 7, 6, 5, 4]
+        const creditArr = []
+        // const sem5TotalCr = '<%- subjectData.sem5TotalCr %>'
+        // const sem6TotalCr = '<%- subjectData.sem6TotalCr %>'
+        let sem5TotalCr = 0
+        let sem6TotalCr = 0
+        let creditTotal = 0
+        let totalGCSem5 = 0
+        let totalGCSem6 = 0
+        let _totalSTPI = 0
+        let _totalSTPI_1 = 0
+        let _totalSTPI_2 = 0
+
+        const calculateBtn = document.getElementById("calculateBtn")
+        const select = document.querySelectorAll(".selectGr")
+        const credit = document.querySelectorAll(".credit")
+        const sem = document.querySelectorAll(".sem")
+
+        const closePopup = document.getElementById("closePopup")
+        const popup = document.getElementById("popup")
+
+
+        for (let j = 0; j < credit.length; j++) {
+            // const element = credit[j];
+            creditArr.push(parseInt(credit[j].innerText))
+        }
+
+        calculateBtn.addEventListener("click", () => {
+            for (let i = 0; i < select.length; i++) {
+                if (parseInt(sem[i].innerText) === 5) {
+                    sem5TotalCr = sem5TotalCr + parseInt(credit[i].innerText)
+                    totalGCSem5 = totalGCSem5 + (grvalArr[select[i].selectedIndex] * creditArr[i])
+                } else if (parseInt(sem[i].innerText) === 6) {
+                    sem6TotalCr = sem6TotalCr + parseInt(credit[i].innerText)
+                    totalGCSem6 = totalGCSem6 + (grvalArr[select[i].selectedIndex] * creditArr[i])
+                } else if (parseInt(sem[i].innerText) === 4) {
+                    sem5TotalCr = sem5TotalCr + parseInt(credit[i].innerText)
+                    totalGCSem5 = totalGCSem5 + (grvalArr[select[i].selectedIndex] * creditArr[i])
+                }
+            }
+            _totalSTPI_1 = getStpi(totalGCSem5, sem5TotalCr)
+            _totalSTPI_2 = getStpi(totalGCSem6, sem6TotalCr)
+            // if (isNaN(_totalSTPI_1)) {
+            //     _totalSTPI_1 = 0
+            // }            
+            // if (isNaN(_totalSTPI_2)) {
+            //     _totalSTPI_2 = 0
+            // }
+            _totalSTPI = _totalSTPI_1 + _totalSTPI_2
+            document.getElementById("_totalSTPI").innerText = _totalSTPI.toFixed(2)
+            document.getElementById("_totalSTPI_1").innerText = _totalSTPI_1.toFixed(2)
+            document.getElementById("_totalSTPI_2").innerText = _totalSTPI_2.toFixed(2)
+            popup.classList.toggle("hidden")
+            console.log(((totalGCSem5 / sem5TotalCr) + (totalGCSem6 / sem6TotalCr)));
+            totalGCSem6 = 0
+            totalGCSem5 = 0
+            sem5TotalCr = 0
+            sem6TotalCr = 0
+            creditTotal = 0
+            _totalSTPI = 0
+            _totalSTPI_1 = 0
+            _totalSTPI_2 = 0
+        })
+
+        // Event for closing change image popup
+        closePopup.addEventListener("click", () => {
+            popup.classList.toggle("hidden")
+        })
+
+        // Close popup if clicked outside
+        window.onclick = function (event) {
+            if (event.target == popup) {
+                popup.classList.toggle("hidden")
+            }
+        }
+    </script>
+</body>
+
+</html>
